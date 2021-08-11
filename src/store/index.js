@@ -95,6 +95,10 @@ export default new Vuex.Store({
   // "Matt. 1; Matthew 2:4; Matt. 5:18-20; Psa. 145-146; Psalm 140:12-141:9"
   async getVerseList({dispatch, state}, verseString){
 
+    // Make sure books with one chapter have a 1 as the chapter ie "Philemon; 1 Sam 2:12-36" to "Philemon 1; 1 Sam 2:12-36"
+    verseString = verseString.replace(/(\D);/g, "$1 1;");
+    verseString = verseString.replace(/(\D$)/g, "$1 1");
+
     // Split into sectons: [Matt. 1, ..., Psalm 140:12-141:9]
     var verseList = verseString.replace(/; /g, ";").split(';');
 
@@ -237,7 +241,17 @@ export default new Vuex.Store({
           verse.text = verse.text.replace(/\[/g, "").replace(/\]/g, "")
         }
         if (verse.text.startsWith("No such verse")) {
+          next = end
           break
+        }
+
+        // Add catchup days ie when reference does not work supply this verse
+        if (verse.text.startsWith("No such ref")) {
+          if (title.slice(-3, -1) == " 1") {
+            title = title.slice(0, -2)
+          }
+          verse.text = "Enjoy my fav verse :) Phil. 4:19 And my God will fill your every need according to His riches, in glory, in Christ Jesus."
+          next = end
         }
       }
       data.verses = data.verses.slice(0,index)
